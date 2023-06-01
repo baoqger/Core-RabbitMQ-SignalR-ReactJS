@@ -43,7 +43,9 @@ class FetchRabbitMQMassages extends Component {
 
     receiveMQMessage = (msgs) => {
         console.log('Messages received by component from MQ: ' + msgs);
-        this.setState({ messages: msgs });
+        const { messages } = this.state;
+        const all = messages.concat(msgs);
+        this.setState({ messages: all });
     }
 
     sendMessageSignal = (e) => {

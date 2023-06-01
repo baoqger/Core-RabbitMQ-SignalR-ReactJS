@@ -23,11 +23,13 @@ namespace RabbitMQ.Services
         {
             try
             {
-                var factory = new ConnectionFactory() { HostName = "54.184.93.13" };
+                var factory = new ConnectionFactory() { HostName = "localhost" };
                 using (var connection = factory.CreateConnection())
                 {
                     using (var channel = connection.CreateModel())
                     {
+                        // declare exchange
+                        channel.ExchangeDeclare(exchange: "logs", type: ExchangeType.Fanout);
                         channel.QueueDeclare(queue: "counter",
                                      durable: true,
                                      exclusive: false,
@@ -36,15 +38,9 @@ namespace RabbitMQ.Services
 
                         var message = $"Message {_messageCount++}";
 
-                        Dictionary<string, int> messages = null;
-                        _memoryCache.TryGetValue<Dictionary<string, int>>("messages", out messages);
-                        if (messages == null) messages = new Dictionary<string, int>();
-                        messages.Add(message, _messageCount);
-                        _memoryCache.Set<Dictionary<string, int>>("messages", messages);
-
                         var messageBody = Encoding.UTF8.GetBytes(message);
 
-                        channel.BasicPublish(exchange: "counter", routingKey: "counter", body: messageBody, basicProperties: null);
+                        channel.BasicPublish(exchange: "logs", routingKey: "", body: messageBody, basicProperties: null);
                     }
                 }
 
